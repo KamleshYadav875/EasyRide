@@ -20,6 +20,7 @@ public class RiderServiceImpl implements RiderService {
 
     private final ModelMapper modelMapper;
 
+    // just to modify git
     @Override
     public RideRequestDto requestRide(RideRequestDto rideRequestDto) {
         RideRequest rideRequest = modelMapper.map(rideRequestDto, RideRequest.class);
