@@ -165,6 +165,6 @@ INSERT INTO driver (user_id, rating, available, current_location) VALUES
 (39, 4.7, true, ST_GeomFromText('POINT(77.2485 28.6459)', 4326)),
 (40, 4.8, true, ST_GeomFromText('POINT(77.2495 28.6479)', 4326));
 
-INSERT INTO wallet (user_id, balance) VALUES
-(1, 100),
-(2, 500);
+--INSERT INTO wallet (user_id, balance) VALUES
+--(1, 100),
+--(2, 500);

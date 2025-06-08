@@ -23,7 +23,7 @@ public class AuthServiceImpl implements AuthService {
 
     private  final UserRepository userRepository;
 
-    private RiderService riderService;
+    private final RiderService riderService;
 
     @Override
     public String login(String email, String password) {
@@ -33,14 +33,17 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserDto signup(SignupDto signupDto) {
 
-        userRepository.findByEmail(signupDto.getEmail()).orElseThrow(() -> new RunTimeConfilictException("Cannot signup, User already exists with email "+signupDto.getEmail()));
+        User userCheck = userRepository.findByEmail(signupDto.getEmail()).orElse(null);
+        if(userCheck != null){
+            throw  new RunTimeConfilictException("Cannot signup, User already exists with email "+signupDto.getEmail());
+        }
 
         User user = modelMapper.map(signupDto, User.class);
         user.setRoles(Set.of(Role.RIDER));
         User savedUser = userRepository.save(user);
 
         // Create A rider
-        riderService.createRider(savedUser);
+           riderService.createRider(savedUser);
 
         return modelMapper.map(user, UserDto.class);
 
