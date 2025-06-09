@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,11 +42,13 @@ public class RiderServiceImpl implements RiderService {
 
     // just to modify git
     @Override
+    @Transactional
     public RideRequestDto requestRide(RideRequestDto rideRequestDto) {
 
         Rider rider  = getCurrentRider();
         RideRequest rideRequest = modelMapper.map(rideRequestDto, RideRequest.class);
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
+        rideRequest.setRider(rider);
 
         double fare = rideStrategyManager.rideFareCalculationStrategy().calculateFare(rideRequest);
         rideRequest.setFare(fare);
@@ -54,6 +57,8 @@ public class RiderServiceImpl implements RiderService {
 
         rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDriver(rideRequest);
 
+
+        // TODO: Send notification to Drivers
 
         return modelMapper.map(saveRideRequest, RideRequestDto.class);
     }

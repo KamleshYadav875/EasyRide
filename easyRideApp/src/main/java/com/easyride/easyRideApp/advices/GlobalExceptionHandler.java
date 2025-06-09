@@ -30,6 +30,16 @@ public class GlobalExceptionHandler {
         return buildErrorResponseEntity(apiError);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException exception){
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message(exception.getMessage())
+                .build();
+
+        return buildErrorResponseEntity(apiError);
+    }
+
 
     private ResponseEntity<ApiResponse<?>> buildErrorResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(new ApiResponse<>(apiError), apiError.getStatus());

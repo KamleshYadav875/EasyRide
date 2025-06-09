@@ -24,7 +24,7 @@ public class RideRequestDto {
 
     private LocalDateTime requestedTime;
 
-    private RideDto rider;
+    private RiderDto rider;
 
     private PaymentMethod paymentMethod;
 
