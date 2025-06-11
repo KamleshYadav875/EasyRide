@@ -1,15 +1,15 @@
 package com.easyride.easyRideApp.services.impl;
 
 import com.easyride.easyRideApp.dto.DriverDto;
+import com.easyride.easyRideApp.dto.RatingDto;
 import com.easyride.easyRideApp.dto.RideDto;
-import com.easyride.easyRideApp.dto.RiderDto;
-import com.easyride.easyRideApp.entities.Driver;
-import com.easyride.easyRideApp.entities.Ride;
-import com.easyride.easyRideApp.entities.RideRequest;
+import com.easyride.easyRideApp.entities.*;
 import com.easyride.easyRideApp.entities.enums.RideRequestStatus;
+import com.easyride.easyRideApp.entities.enums.RideStatus;
 import com.easyride.easyRideApp.exceptions.ResourceNotFoundException;
 import com.easyride.easyRideApp.repositories.DriverRepository;
 import com.easyride.easyRideApp.services.DriverService;
+import com.easyride.easyRideApp.services.RatingService;
 import com.easyride.easyRideApp.services.RideRequestService;
 import com.easyride.easyRideApp.services.RideService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,25 +28,86 @@ public class DriverServiceImpl implements DriverService {
     private final DriverRepository driverRepository;
     private final RideService rideService;
     private final ModelMapper modelMapper;
+    private final RatingService ratingService;
 
     @Override
     public RideDto cancelRide(Long rideId) {
-        return null;
+
+        Ride ride = rideService.findRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if(!ride.getRideStatus().equals(RideStatus.ACCEPTED)){
+            throw new RuntimeException("RideRequest cannot be cancel, status is "+ride.getRideStatus());
+        }
+
+        if(!ride.getDriver().equals(driver)){
+            throw new RuntimeException("You are not authorized to cancel the ride");
+        }
+
+        ride.setRideStatus(RideStatus.CANCELLED);
+        return modelMapper.map(rideService.updateRide(ride), RideDto.class);
     }
 
     @Override
-    public RideDto startRide(Long rideId) {
-        return null;
+    public RideDto startRide(Long rideId, String otp) {
+
+        Ride ride = rideService.findRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if(!ride.getRideStatus().equals(RideStatus.ACCEPTED)){
+            throw new RuntimeException("Ride cannot start in status: "+ride.getRideStatus());
+        }
+
+        if(!driver.equals(ride.getDriver())){
+            throw new RuntimeException("You are not authorized to start the ride");
+        }
+
+        if(!otp.equals(ride.getOtp()))
+        {
+            throw new RuntimeException("Invalid Otp entered");
+        }
+
+        ride.setStartedAt(LocalDateTime.now());
+        ride.setRideStatus(RideStatus.ON_TRIP);
+        return modelMapper.map(rideService.updateRide(ride), RideDto.class);
+
     }
 
     @Override
     public RideDto endRide(Long rideId) {
-        return null;
+        Ride ride = rideService.findRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if(!ride.getRideStatus().equals(RideStatus.ON_TRIP))
+        {
+            throw new RuntimeException("Ride cannot end in status: "+ride.getRideStatus());
+        }
+
+        if(!driver.equals(ride.getDriver()))
+        {
+            throw new RuntimeException("You are not authorized to end the ride.");
+        }
+
+        ride.setRideStatus(RideStatus.COMPLETED);
+        ride.setEndedAt(LocalDateTime.now());
+
+        return modelMapper.map(rideService.updateRide(ride), RideDto.class);
     }
 
     @Override
-    public RiderDto rateRider(Long rideId) {
-        return null;
+    public RatingDto rateRider(RatingDto ratingDto) {
+
+        Ride ride = rideService.findRideById(ratingDto.getRide().getId());
+        Rating ratingRider = Rating.builder()
+                .fromUser(ride.getDriver().getUser())
+                .toUser(ride.getRider().getUser())
+                .rating(ratingDto.getRating())
+                .comment(ratingDto.getComment())
+                .ride(ride)
+                .build();
+
+        return modelMapper.map(ratingService.submitRating(ratingRider), RatingDto.class);
+
     }
 
     @Override
@@ -77,4 +139,6 @@ public class DriverServiceImpl implements DriverService {
     public Driver getCurrentDriver() {
         return driverRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Driver not found with id "+2));
     }
+
+
 }

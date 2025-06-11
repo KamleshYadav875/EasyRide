@@ -37,7 +37,7 @@ public class Ride {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING )
     private RideStatus rideStatus;
 
     private Double fare;

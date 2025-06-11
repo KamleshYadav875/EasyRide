@@ -40,7 +40,7 @@ INSERT INTO app_user (name, email, password) VALUES
 ('Seema Rao', 'seema.rao@example.com', '$2a$10$examplePasswordHash39'),
 ('Tarun Sharma', 'tarun.sharma@example.com', '$2a$10$examplePasswordHash40');
 
-INSERT INTO user_role (user_id, role) VALUES
+INSERT INTO user_roles (user_id, roles) VALUES
 (1, 'RIDER'),
 (2, 'RIDER'),
 (2, 'DRIVER'),

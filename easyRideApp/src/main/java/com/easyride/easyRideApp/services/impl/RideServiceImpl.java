@@ -6,6 +6,7 @@ import com.easyride.easyRideApp.entities.Ride;
 import com.easyride.easyRideApp.entities.RideRequest;
 import com.easyride.easyRideApp.entities.enums.RideRequestStatus;
 import com.easyride.easyRideApp.entities.enums.RideStatus;
+import com.easyride.easyRideApp.exceptions.ResourceNotFoundException;
 import com.easyride.easyRideApp.repositories.RideRepository;
 import com.easyride.easyRideApp.services.RideRequestService;
 import com.easyride.easyRideApp.services.RideService;
@@ -40,7 +41,7 @@ public class RideServiceImpl implements RideService {
         rideRequest.setRideRequestStatus(RideRequestStatus.CONFIRMED);
 
         Ride ride = modelMapper.map(rideRequest, Ride.class);
-        ride.setRideStatus(RideStatus.CONFIRMED);
+        ride.setRideStatus(RideStatus.ACCEPTED);
         ride.setDriver(driver);
         ride.setOtp(generateRandomOTP());
 
@@ -51,8 +52,8 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public Ride updateRideStatus(Long rideId, RideStatus rideStatus) {
-        return null;
+    public Ride updateRide(Ride ride) {
+        return rideRepository.save(ride);
     }
 
     @Override
@@ -63,6 +64,11 @@ public class RideServiceImpl implements RideService {
     @Override
     public Page<Ride> getAllRideOfDriver(Long driverId, PageRequest pageRequest) {
         return null;
+    }
+
+    @Override
+    public Ride findRideById(Long rideId) {
+        return rideRepository.findById(rideId).orElseThrow(() -> new ResourceNotFoundException("Ride not found with id "+rideId));
     }
 
     private String generateRandomOTP(){

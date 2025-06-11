@@ -1,9 +1,6 @@
 package com.easyride.easyRideApp.services;
 
-import com.easyride.easyRideApp.dto.DriverDto;
-import com.easyride.easyRideApp.dto.RideDto;
-import com.easyride.easyRideApp.dto.RideRequestDto;
-import com.easyride.easyRideApp.dto.RiderDto;
+import com.easyride.easyRideApp.dto.*;
 import com.easyride.easyRideApp.entities.Rider;
 import com.easyride.easyRideApp.entities.User;
 
@@ -24,4 +21,5 @@ public interface RiderService {
     Rider createRider(User user);
 
     Rider getCurrentRider();
+
 }

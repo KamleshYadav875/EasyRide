@@ -16,12 +16,13 @@ public interface RideService {
 
     Ride createNewRide(RideRequest rideRequest, Driver driver);
 
-    Ride updateRideStatus(Long rideId, RideStatus rideStatus);
+    Ride updateRide(Ride ride);
 
     Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest);
 
     Page<Ride> getAllRideOfDriver(Long driverId, PageRequest pageRequest);
 
+    Ride findRideById(Long rideId);
 
 
 
