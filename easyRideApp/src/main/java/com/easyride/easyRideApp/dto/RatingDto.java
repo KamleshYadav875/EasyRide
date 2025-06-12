@@ -13,7 +13,7 @@ public class RatingDto {
 
     private Integer rating;
 
-    private Ride ride;
+    private RideDto ride;
 
     private UserDto fromUser;
 

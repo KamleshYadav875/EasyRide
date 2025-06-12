@@ -131,6 +131,9 @@ public class DriverServiceImpl implements DriverService {
         }
 
         Ride ride = rideService.createNewRide(rideRequest, driver);
+
+        driver.setAvailable(false);
+        driverRepository.save(driver);
         return modelMapper.map(ride, RideDto.class);
 
     }
