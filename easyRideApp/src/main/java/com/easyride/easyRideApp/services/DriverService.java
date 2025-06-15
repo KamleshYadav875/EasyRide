@@ -26,6 +26,6 @@ public interface DriverService {
 
     Driver getCurrentDriver();
 
-
+    Driver createDriver(Driver driver);
 
 }

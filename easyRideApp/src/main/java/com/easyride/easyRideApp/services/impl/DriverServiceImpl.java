@@ -8,10 +8,7 @@ import com.easyride.easyRideApp.entities.enums.RideRequestStatus;
 import com.easyride.easyRideApp.entities.enums.RideStatus;
 import com.easyride.easyRideApp.exceptions.ResourceNotFoundException;
 import com.easyride.easyRideApp.repositories.DriverRepository;
-import com.easyride.easyRideApp.services.DriverService;
-import com.easyride.easyRideApp.services.RatingService;
-import com.easyride.easyRideApp.services.RideRequestService;
-import com.easyride.easyRideApp.services.RideService;
+import com.easyride.easyRideApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -29,6 +26,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final RatingService ratingService;
+    private final PaymentService paymentService;
 
     @Override
     public RideDto cancelRide(Long rideId) {
@@ -49,6 +47,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional
     public RideDto startRide(Long rideId, String otp) {
 
         Ride ride = rideService.findRideById(rideId);
@@ -69,11 +68,15 @@ public class DriverServiceImpl implements DriverService {
 
         ride.setStartedAt(LocalDateTime.now());
         ride.setRideStatus(RideStatus.ON_TRIP);
+
+        paymentService.createNewPayment(ride);
+
         return modelMapper.map(rideService.updateRide(ride), RideDto.class);
 
     }
 
     @Override
+    @Transactional
     public RideDto endRide(Long rideId) {
         Ride ride = rideService.findRideById(rideId);
         Driver driver = getCurrentDriver();
@@ -91,6 +94,7 @@ public class DriverServiceImpl implements DriverService {
         ride.setRideStatus(RideStatus.COMPLETED);
         ride.setEndedAt(LocalDateTime.now());
 
+        paymentService.processPayment(ride);
         return modelMapper.map(rideService.updateRide(ride), RideDto.class);
     }
 
@@ -98,6 +102,11 @@ public class DriverServiceImpl implements DriverService {
     public RatingDto rateRider(RatingDto ratingDto) {
 
         Ride ride = rideService.findRideById(ratingDto.getRide().getId());
+
+        if(!ride.getRideStatus().equals(RideStatus.COMPLETED)){
+            throw new RuntimeException("Rate rider once ride is completed");
+        }
+
         Rating ratingRider = Rating.builder()
                 .fromUser(ride.getDriver().getUser())
                 .toUser(ride.getRider().getUser())
@@ -141,6 +150,11 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public Driver getCurrentDriver() {
         return driverRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Driver not found with id "+2));
+    }
+
+    @Override
+    public Driver createDriver(Driver driver) {
+        return driverRepository.save(driver);
     }
 
 

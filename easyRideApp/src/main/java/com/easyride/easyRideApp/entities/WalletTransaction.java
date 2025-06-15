@@ -3,6 +3,7 @@ package com.easyride.easyRideApp.entities;
 import com.easyride.easyRideApp.entities.enums.TransactionMethod;
 import com.easyride.easyRideApp.entities.enums.TransactionType;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@Builder
 public class WalletTransaction {
 
     @Id
@@ -25,7 +27,7 @@ public class WalletTransaction {
     @Enumerated(EnumType.STRING)
     private TransactionMethod transactionMethod;
 
-    @OneToOne
+    @ManyToOne
     private Ride ride;
 
     private  String transactionId;

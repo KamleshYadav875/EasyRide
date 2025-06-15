@@ -1,23 +1,18 @@
 package com.easyride.easyRideApp.services.impl;
 
-import com.easyride.easyRideApp.dto.DriverDto;
-import com.easyride.easyRideApp.dto.RideDto;
-import com.easyride.easyRideApp.dto.RideRequestDto;
-import com.easyride.easyRideApp.dto.RiderDto;
-import com.easyride.easyRideApp.entities.RideRequest;
-import com.easyride.easyRideApp.entities.Rider;
-import com.easyride.easyRideApp.entities.User;
+import com.easyride.easyRideApp.dto.*;
+import com.easyride.easyRideApp.entities.*;
 import com.easyride.easyRideApp.entities.enums.RideRequestStatus;
+import com.easyride.easyRideApp.entities.enums.RideStatus;
 import com.easyride.easyRideApp.exceptions.ResourceNotFoundException;
+import com.easyride.easyRideApp.exceptions.RunTimeConfilictException;
 import com.easyride.easyRideApp.repositories.RideRequestRepository;
 import com.easyride.easyRideApp.repositories.RiderRepository;
+import com.easyride.easyRideApp.services.RatingService;
+import com.easyride.easyRideApp.services.RideRequestService;
+import com.easyride.easyRideApp.services.RideService;
 import com.easyride.easyRideApp.services.RiderService;
-import com.easyride.easyRideApp.strategies.DriverMatchingStrategy;
-import com.easyride.easyRideApp.strategies.RideFareCalculationStrategy;
 import com.easyride.easyRideApp.strategies.RideStrategyManager;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -38,6 +33,12 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
 
     private final RideStrategyManager rideStrategyManager;
+
+    private final RideRequestService rideRequestService;
+
+    private final RideService rideService;
+
+    private final RatingService ratingService;
 
 
     // just to modify git
@@ -64,13 +65,33 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
-    public RideDto cancelRide(Long rideId) {
-        return null;
+    public RideRequestDto cancelRideRequest(Long rideRequestId) {
+        RideRequest rideRequest = rideRequestService.findRideRequestById(rideRequestId);
+
+        if(!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING)){
+            throw new RunTimeConfilictException("You cannot cancel riderequest in status: "+rideRequest.getRideRequestStatus());
+        }
+
+        rideRequest.setRideRequestStatus(RideRequestStatus.CANCELLED);
+        return modelMapper.map(rideRequestService.update(rideRequest), RideRequestDto.class);
     }
 
     @Override
-    public DriverDto rateDriver(Long rideId, Integer rating) {
-        return null;
+    public RatingDto rateDriver(RatingDto ratingDto) {
+        Ride ride = rideService.findRideById(ratingDto.getRide().getId());
+
+        if(!ride.getRideStatus().equals(RideStatus.COMPLETED)){
+            throw new RuntimeException("Rate driver once ride is completed");
+        }
+        Rating ratingRider = Rating.builder()
+                .fromUser(ride.getRider().getUser())
+                .toUser(ride.getDriver().getUser())
+                .rating(ratingDto.getRating())
+                .comment(ratingDto.getComment())
+                .ride(ride)
+                .build();
+
+        return modelMapper.map(ratingService.submitRating(ratingRider), RatingDto.class);
     }
 
     @Override

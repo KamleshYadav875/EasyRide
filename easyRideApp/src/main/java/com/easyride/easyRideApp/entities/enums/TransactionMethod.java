@@ -1,5 +1,5 @@
 package com.easyride.easyRideApp.entities.enums;
 
 public enum TransactionMethod {
-    BANKING, W2W
+    BANKING, RIDE
 }

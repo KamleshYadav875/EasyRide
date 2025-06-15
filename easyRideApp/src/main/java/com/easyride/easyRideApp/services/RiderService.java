@@ -1,6 +1,7 @@
 package com.easyride.easyRideApp.services;
 
 import com.easyride.easyRideApp.dto.*;
+import com.easyride.easyRideApp.entities.RideRequest;
 import com.easyride.easyRideApp.entities.Rider;
 import com.easyride.easyRideApp.entities.User;
 
@@ -10,9 +11,9 @@ public interface RiderService {
 
     RideRequestDto requestRide(RideRequestDto rideRequestDto);
 
-    RideDto cancelRide(Long rideId);
+    RideRequestDto cancelRideRequest(Long rideRequestId);
 
-    DriverDto rateDriver(Long rideId, Integer rating);
+    RatingDto  rateDriver(RatingDto ratingDto);
 
     RiderDto getMyProfile();
 

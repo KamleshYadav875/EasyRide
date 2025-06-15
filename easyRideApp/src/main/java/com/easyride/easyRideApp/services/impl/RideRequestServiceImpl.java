@@ -20,9 +20,9 @@ public class RideRequestServiceImpl implements RideRequestService {
     }
 
     @Override
-    public void update(RideRequest rideRequest) {
+    public RideRequest update(RideRequest rideRequest) {
         rideRequestRepository.findById(rideRequest.getId()).orElseThrow(() -> new ResourceNotFoundException("RideRequest not found with id: "+rideRequest.getId()));
 
-        rideRequestRepository.save(rideRequest);
+        return rideRequestRepository.save(rideRequest);
     }
 }

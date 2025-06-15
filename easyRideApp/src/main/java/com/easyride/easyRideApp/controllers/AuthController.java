@@ -1,14 +1,14 @@
 package com.easyride.easyRideApp.controllers;
 
+import com.easyride.easyRideApp.dto.DriverDto;
+import com.easyride.easyRideApp.dto.OnBoardDriverDto;
 import com.easyride.easyRideApp.dto.SignupDto;
 import com.easyride.easyRideApp.dto.UserDto;
 import com.easyride.easyRideApp.services.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,6 +19,11 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signUp(@RequestBody SignupDto signupDto){
-        return  ResponseEntity.ok(authService.signup(signupDto));
+        return  new ResponseEntity<>(authService.signup(signupDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/onBoardNewDriver/{userId}")
+    public ResponseEntity<DriverDto> onBoardNewDriver(@RequestBody OnBoardDriverDto onBoardDriverDto){
+        return new ResponseEntity<>(authService.onBoardNewDriver(onBoardDriverDto.getUserId(), onBoardDriverDto.getVechileId()), HttpStatus.CREATED);
     }
 }
