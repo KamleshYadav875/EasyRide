@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Table(indexes = {
-        @Index(name = "idx_wallet_transaction_wallet", columnList = "waller_id"),
+        @Index(name = "idx_wallet_transaction_wallet", columnList = "wallet_id"),
         @Index(name = "idx_wallet_transaction_ride", columnList = "ride_id"),
 
 })

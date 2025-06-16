@@ -11,6 +11,7 @@ import com.easyride.easyRideApp.repositories.DriverRepository;
 import com.easyride.easyRideApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -149,7 +150,8 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver getCurrentDriver() {
-        return driverRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Driver not found with id "+2));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return driverRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Driver is not associate with user"+user.getId()));
     }
 
     @Override

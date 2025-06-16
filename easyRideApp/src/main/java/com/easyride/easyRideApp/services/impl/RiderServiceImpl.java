@@ -16,6 +16,7 @@ import com.easyride.easyRideApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,10 +117,8 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public Rider getCurrentRider() {
-//        TODO : Implement once Spring security is implemented
-        return riderRepository.findById(1L).orElseThrow(() -> new ResourceNotFoundException("Rider not found with id: "+1));
-
-
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return riderRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Rider not associate with user "+user.getId()));
     }
 
 }

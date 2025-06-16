@@ -9,12 +9,17 @@ import com.easyride.easyRideApp.entities.enums.Role;
 import com.easyride.easyRideApp.exceptions.ResourceNotFoundException;
 import com.easyride.easyRideApp.exceptions.RunTimeConfilictException;
 import com.easyride.easyRideApp.repositories.UserRepository;
+import com.easyride.easyRideApp.security.JWTService;
 import com.easyride.easyRideApp.services.AuthService;
 import com.easyride.easyRideApp.services.DriverService;
 import com.easyride.easyRideApp.services.RiderService;
 import com.easyride.easyRideApp.services.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -33,9 +38,24 @@ public class AuthServiceImpl implements AuthService {
 
     private final DriverService driverService;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
+
+    private final JWTService jwtService;
+
     @Override
-    public String login(String email, String password) {
-        return "";
+    public String[] login(String email, String password) {
+        String tokens[] = new String[2];
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+
+        User user = (User) authentication.getPrincipal();
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        tokens[0] = accessToken;
+        tokens[1] = refreshToken;
+        return tokens;
     }
 
     @Override
@@ -48,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = modelMapper.map(signupDto, User.class);
         user.setRoles(Set.of(Role.RIDER));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
 
         // Create A rider

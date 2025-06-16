@@ -6,11 +6,13 @@ import com.easyride.easyRideApp.dto.StartRideDto;
 import com.easyride.easyRideApp.services.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/drivers")
 @RequiredArgsConstructor
+@Secured("ROLE_DRIVER")
 public class DriverController {
 
     private final DriverService driverService;
