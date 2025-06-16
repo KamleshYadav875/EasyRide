@@ -19,6 +19,11 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @GetMapping("/")
+    public ResponseEntity<String> healthCheck(){
+        return ResponseEntity.ok("OK");
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signUp(@RequestBody SignupDto signupDto){
         return  new ResponseEntity<>(authService.signup(signupDto), HttpStatus.CREATED);
