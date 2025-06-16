@@ -8,10 +8,7 @@ import com.easyride.easyRideApp.exceptions.ResourceNotFoundException;
 import com.easyride.easyRideApp.exceptions.RunTimeConfilictException;
 import com.easyride.easyRideApp.repositories.RideRequestRepository;
 import com.easyride.easyRideApp.repositories.RiderRepository;
-import com.easyride.easyRideApp.services.RatingService;
-import com.easyride.easyRideApp.services.RideRequestService;
-import com.easyride.easyRideApp.services.RideService;
-import com.easyride.easyRideApp.services.RiderService;
+import com.easyride.easyRideApp.services.*;
 import com.easyride.easyRideApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,6 +39,8 @@ public class RiderServiceImpl implements RiderService {
 
     private final RatingService ratingService;
 
+    private final EmailSenderService emailSenderService;
+
 
     // just to modify git
     @Override
@@ -57,10 +57,22 @@ public class RiderServiceImpl implements RiderService {
 
         RideRequest saveRideRequest = rideRequestRepository.save(rideRequest);
 
-        rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDriver(rideRequest);
+        List<Driver> drivers = rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDriver(rideRequest);
+        String driverEmail [] = drivers.stream().map(d -> d.getUser().getEmail()).toArray(String[]::new);
 
+        if(driverEmail.length > 0){
+            emailSenderService.sendEmail(driverEmail, "New Ride Request Available Near You!", "Hello,\n" +
+                    "\n" +
+                    "A new ride request has been made near your current location.\n" +
+                    "\n" +
+                    "Please open the app to view the request and accept the ride if you're available.\n" +
+                    "\n" +
+                    "Quick actions lead to better earnings — don't miss out!\n" +
+                    "\n" +
+                    "Thank you,  \n" +
+                    "Team EasyRide");
+        }
 
-        // TODO: Send notification to Drivers
 
         return modelMapper.map(saveRideRequest, RideRequestDto.class);
     }
