@@ -14,6 +14,6 @@ phases:
       - echo Build, Testing and packaging completed.
 artifacts:
   files:
-    - target/*.jar
+    - easyRideApp/target/*.jar
   discard-paths: yes
 
