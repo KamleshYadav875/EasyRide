@@ -14,15 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-
 public class AuthController {
 
     private final AuthService authService;
 
-    @GetMapping("/")
-    public ResponseEntity<String> healthCheck(){
-        return ResponseEntity.ok("OK");
-    }
 
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signUp(@RequestBody SignupDto signupDto){
