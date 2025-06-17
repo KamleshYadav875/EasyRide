@@ -20,7 +20,9 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC_ROUTES = {
             "/auth/**",
             "/",
-            "/actuator/**"
+            "/actuator/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
     } ;
 
     private final JwtAuthFilter jwtAuthFilter;

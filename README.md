@@ -115,7 +115,7 @@ EasyRide simulates real-world ride-hailing workflows with a focus on clean archi
 
 ---
 
-http://localhost:8080/swagger-ui/index.html
+http://easyride1.ap-south-1.elasticbeanstalk.com/swagger-ui/index.html
 
 
 ✅ Future Enhancements
