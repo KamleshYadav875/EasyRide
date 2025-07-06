@@ -1,6 +1,7 @@
 package com.easyride.easyRideApp.services.impl;
 
 import com.easyride.easyRideApp.dto.DriverDto;
+import com.easyride.easyRideApp.dto.LoginResponseDto;
 import com.easyride.easyRideApp.dto.SignupDto;
 import com.easyride.easyRideApp.dto.UserDto;
 import com.easyride.easyRideApp.entities.Driver;
@@ -16,6 +17,7 @@ import com.easyride.easyRideApp.services.RiderService;
 import com.easyride.easyRideApp.services.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -45,17 +47,16 @@ public class AuthServiceImpl implements AuthService {
     private final JWTService jwtService;
 
     @Override
-    public String[] login(String email, String password) {
-        String tokens[] = new String[2];
+    public LoginResponseDto login(String email, String password) {
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
         User user = (User) authentication.getPrincipal();
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        tokens[0] = accessToken;
-        tokens[1] = refreshToken;
-        return tokens;
+        LoginResponseDto loginResponseDto = new LoginResponseDto(accessToken, refreshToken);
+        return loginResponseDto;
     }
 
     @Override
@@ -104,5 +105,15 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return modelMapper.map(savedDriver, DriverDto.class);
+    }
+
+    @Override
+    public ResponseEntity<LoginResponseDto> refreshToken(String refreshToken) {
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with user id: "+userId));
+        String accessToken = jwtService.generateRefreshToken(user);
+
+        LoginResponseDto loginResponseDto = new LoginResponseDto(accessToken, refreshToken);
+        return ResponseEntity.ok(loginResponseDto);
     }
 }

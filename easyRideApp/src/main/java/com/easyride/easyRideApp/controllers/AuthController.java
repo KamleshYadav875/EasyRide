@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,12 +35,25 @@ public class AuthController {
 
     @PostMapping("/login")
     ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse){
-       String token[]  = authService.login(loginRequestDto.getEmail(), loginRequestDto.getPassword());
-        Cookie cookie = new Cookie("token", token[0]);
+        LoginResponseDto loginResponseDto  = authService.login(loginRequestDto.getEmail(), loginRequestDto.getPassword());
+        Cookie cookie = new Cookie("refreshToken", loginResponseDto.getRefreshToken());
         cookie.setSecure(false);
         cookie.setHttpOnly(true);
 
         httpServletResponse.addCookie(cookie);
-       return ResponseEntity.ok(new LoginResponseDto(token[0]));
+        return ResponseEntity.ok(loginResponseDto);
+    }
+
+    @PostMapping("/refresh")
+    ResponseEntity<LoginResponseDto> refresh(HttpServletRequest request){
+        Cookie cookies[] = request.getCookies();
+        String refreshToken = Arrays.stream( cookies)
+                .filter( cookie -> cookie.getName().equals("refreshToken"))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow( () -> new AuthenticationServiceException("Invalid Refresh Token!!"));
+
+       return authService.refreshToken(refreshToken);
+
     }
 }
